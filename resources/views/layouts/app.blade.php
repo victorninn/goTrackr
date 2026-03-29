@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'TimeTracker') }}</title>
+    <title>@hasSection('page-title') @yield('page-title') | {{ config('brand.name') }} @endif</title>
+    <link rel="icon" type="image/png" href="{{ Storage::url('logos/goTrackr.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-100 font-sans">
@@ -14,7 +15,7 @@
     {{-- SIDEBAR --}}
     <aside id="sidebar" class="w-64 bg-blue-900 text-white flex flex-col flex-shrink-0 transition-all duration-300">
 
-        {{-- Logo / Company --}}
+        {{-- Logo / Company 
         <div class="flex items-center gap-3 px-5 py-5 border-b border-blue-800">
             @php $company = auth()->user()->company; @endphp
             @if($company && $company->logo)
@@ -26,7 +27,29 @@
             @endif
             <div class="overflow-hidden">
                 <p class="text-xs text-blue-300 leading-none">Company</p>
-                <p class="text-sm font-semibold truncate leading-tight mt-0.5">{{ $company->name ?? 'TimeTracker' }}</p>
+                <p class="text-sm font-semibold truncate leading-tight mt-0.5">{{ $company->name ?? config('brand.name') }}</p>
+            </div>
+        </div>--}}
+
+        <div class="flex items-center gap-3 px-5 py-5 border-b border-blue-800">
+            @php $company = auth()->user()->company; @endphp
+            @if($company && $company->logo)
+                <img src="{{ Storage::url($company->logo) }}" alt="Logo" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400">
+            @elseif($company)
+                <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
+                    {{ strtoupper(substr($company->name, 0, 1)) }}
+                </div>
+            @else
+                {{-- Super Admin: goTrackr brand logo --}}
+                <img src="{{ Storage::url('logos/goTrackr.png') }}" alt="{{ config('brand.name') }}" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400">
+            @endif
+            <div class="overflow-hidden">
+                <p class="text-xs text-blue-300 leading-none">
+                    {{ auth()->user()->isSuperAdmin() ? config('brand.name') : 'Company' }}
+                </p>
+                <p class="text-sm font-semibold truncate leading-tight mt-0.5">
+                    {{ $company->name ?? config('brand.name') }}
+                </p>
             </div>
         </div>
 

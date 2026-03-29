@@ -9,14 +9,23 @@
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
  
-    /* Custom primary color scale (migrated from CDN tailwind.config) */
-     --color-blue-50:  #eef2ff;
+    /* Custom primary color scale (migrated from CDN tailwind.config)
+    --color-blue-50:  #eef2ff;
     --color-blue-100: #e0e7ff;
     --color-blue-500: #6366f1;
     --color-blue-600: #4f46e5;
     --color-blue-700: #4338ca;
     --color-blue-800: #3730a3;
     --color-blue-900: #312e81;
+     */
+
+    --color-blue-50:  #FAE8FF;
+    --color-blue-100: #e0e7ff;
+    --color-blue-500: #B3CDE0;
+    --color-blue-600: #011F4B;
+    --color-blue-700: #015B96;
+    --color-blue-800: #03396C;
+    --color-blue-900: #011F4B;
 }
 
 
