@@ -8,7 +8,7 @@ use Carbon\Carbon;
 class TimeLog extends Model
 {
     protected $fillable = [
-        'user_id', 'date', 'clock_in', 'clock_out', 'total_hours',
+        'user_id', 'date', 'clock_in', 'clock_out', 'total_hours', 'description',
     ];
 
     protected $casts = [

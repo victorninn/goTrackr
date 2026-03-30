@@ -74,6 +74,7 @@
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Clock In</th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Clock Out</th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Hours</th>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
                 </tr>
             </thead>
@@ -98,6 +99,9 @@
                     </td>
                     <td class="px-6 py-3 font-semibold text-gray-800">
                         {{ $log->total_hours ? $log->total_hours . ' hrs' : '—' }}
+                    </td>
+                    <td class="px-6 py-3 text-gray-500 max-w-xs truncate" title="{{ $log->description }}">
+                        {{ $log->description ?: '—' }}
                     </td>
                     <td class="px-6 py-3">
                         @if($log->clock_out)

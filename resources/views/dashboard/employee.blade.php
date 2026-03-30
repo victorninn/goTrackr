@@ -19,6 +19,10 @@
             <div class="bg-white/10 rounded-xl p-4 mb-5">
                 <p class="text-blue-200 text-xs mb-1">Clocked in at</p>
                 <p class="text-xl font-semibold">{{ \Carbon\Carbon::parse($activeLog->clock_in)->format('h:i A') }}</p>
+                @if($activeLog->description)
+                    <p class="text-blue-200 text-xs mt-2">Working on</p>
+                    <p class="text-sm text-white/90 mt-0.5 italic">{{ $activeLog->description }}</p>
+                @endif
                 <p class="text-blue-200 text-xs mt-2">Elapsed time</p>
                 <p class="text-2xl font-mono font-bold text-yellow-300" id="elapsed-timer">00:00:00</p>
             </div>
@@ -36,6 +40,12 @@
             </div>
             <form method="POST" action="{{ route('clock.in') }}">
                 @csrf
+                <textarea
+                    name="description"
+                    rows="2"
+                    placeholder="What are you working on? (optional)"
+                    class="w-full bg-white/10 text-white placeholder-blue-300 border border-white/20 rounded-xl px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-white/40 resize-none"
+                ></textarea>
                 <button type="submit"
                     class="w-full bg-green-400 hover:bg-green-500 text-white font-semibold py-3 rounded-xl transition-colors shadow-md">
                     🟢 Clock In
@@ -122,6 +132,7 @@
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Clock In</th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Clock Out</th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Hours</th>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
                 </tr>
             </thead>
@@ -136,6 +147,9 @@
                     <td class="px-6 py-3 font-medium text-gray-800">
                         {{ $log->total_hours ? $log->total_hours . ' hrs' : '—' }}
                     </td>
+                    <td class="px-6 py-3 text-gray-500 max-w-xs truncate" title="{{ $log->description }}">
+                        {{ $log->description ?: '—' }}
+                    </td>
                     <td class="px-6 py-3">
                         @if($log->clock_out)
                             <span class="px-2 py-0.5 rounded-full text-xs bg-green-100 text-gray-600">Completed</span>
@@ -147,7 +161,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">No time logs yet. Clock in to start!</td></tr>
+                <tr><td colspan="6" class="px-6 py-8 text-center text-gray-400">No time logs yet. Clock in to start!</td></tr>
                 @endforelse
             </tbody>
         </table>

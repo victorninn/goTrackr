@@ -47,6 +47,7 @@
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Clock In</th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Clock Out</th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Hours</th>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Est. Pay</th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
                 </tr>
@@ -61,6 +62,9 @@
                     </td>
                     <td class="px-6 py-3 font-semibold text-gray-800">
                         {{ $log->total_hours ? $log->total_hours . ' hrs' : '—' }}
+                    </td>
+                    <td class="px-6 py-3 text-gray-500 max-w-xs truncate" title="{{ $log->description }}">
+                        {{ $log->description ?: '—' }}
                     </td>
                     <td class="px-6 py-3 text-gray-700">
                         @if($log->total_hours)
@@ -80,7 +84,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="6" class="px-6 py-10 text-center text-gray-400">No time logs found.</td></tr>
+                <tr><td colspan="7" class="px-6 py-10 text-center text-gray-400">No time logs found.</td></tr>
                 @endforelse
             </tbody>
         </table>

@@ -20,10 +20,15 @@ class TimeLogController extends Controller
             return back()->with('error', 'You already have an active clock-in. Please clock out first.');
         }
 
+        $request->validate([
+            'description' => 'nullable|string|max:500',
+        ]);
+
         TimeLog::create([
-            'user_id'  => $user->id,
-            'date'     => Carbon::today()->toDateString(),
-            'clock_in' => Carbon::now()->toTimeString(),
+            'user_id'     => $user->id,
+            'date'        => Carbon::today()->toDateString(),
+            'clock_in'    => Carbon::now()->toTimeString(),
+            'description' => $request->input('description'),
         ]);
 
         return back()->with('success', 'Clocked in successfully!');
