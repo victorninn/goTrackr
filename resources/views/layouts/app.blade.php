@@ -10,47 +10,49 @@
 </head>
 <body class="bg-gray-100 font-sans">
 
+{{-- Mobile backdrop overlay --}}
+<div id="sidebar-backdrop"
+     class="fixed inset-0 z-20 bg-black/50 lg:hidden hidden"
+     onclick="closeSidebar()">
+</div>
+
 <div class="flex h-screen overflow-hidden">
 
     {{-- SIDEBAR --}}
-    <aside id="sidebar" class="w-64 bg-blue-900 text-white flex flex-col flex-shrink-0 transition-all duration-300">
+    <aside id="sidebar"
+           class="fixed inset-y-0 left-0 z-30 w-64 bg-blue-900 text-white flex flex-col flex-shrink-0
+                  -translate-x-full transition-transform duration-300 ease-in-out
+                  lg:relative lg:translate-x-0">
 
-        {{-- Logo / Company 
-        <div class="flex items-center gap-3 px-5 py-5 border-b border-blue-800">
-            @php $company = auth()->user()->company; @endphp
-            @if($company && $company->logo)
-                <img src="{{ Storage::url($company->logo) }}" alt="Logo" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400">
-            @else
-                <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
-                    {{ strtoupper(substr($company->name ?? 'T', 0, 1)) }}
+        {{-- Logo / Company --}}
+        <div class="flex items-center justify-between gap-3 px-5 py-5 border-b border-blue-800">
+            <div class="flex items-center gap-3 overflow-hidden">
+                @php $company = auth()->user()->company; @endphp
+                @if($company && $company->logo)
+                    <img src="{{ Storage::url($company->logo) }}" alt="Logo" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400 flex-shrink-0">
+                @elseif($company)
+                    <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        {{ strtoupper(substr($company->name, 0, 1)) }}
+                    </div>
+                @else
+                    <img src="{{ Storage::url('logos\goTrackr.png') }}" alt="{{ config('brand.name') }}" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400 flex-shrink-0">
+                @endif
+                <div class="overflow-hidden">
+                    <p class="text-xs text-blue-300 leading-none">
+                        {{ auth()->user()->isSuperAdmin() ? config('brand.name') : 'Company' }}
+                    </p>
+                    <p class="text-sm font-semibold truncate leading-tight mt-0.5">
+                        {{ $company->name ?? config('brand.name') }}
+                    </p>
                 </div>
-            @endif
-            <div class="overflow-hidden">
-                <p class="text-xs text-blue-300 leading-none">Company</p>
-                <p class="text-sm font-semibold truncate leading-tight mt-0.5">{{ $company->name ?? config('brand.name') }}</p>
             </div>
-        </div>--}}
-
-        <div class="flex items-center gap-3 px-5 py-5 border-b border-blue-800">
-            @php $company = auth()->user()->company; @endphp
-            @if($company && $company->logo)
-                <img src="{{ Storage::url($company->logo) }}" alt="Logo" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400">
-            @elseif($company)
-                <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
-                    {{ strtoupper(substr($company->name, 0, 1)) }}
-                </div>
-            @else
-                {{-- Super Admin: goTrackr brand logo --}}
-                <img src="{{ Storage::url('logos\goTrackr.png') }}" alt="{{ config('brand.name') }}" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400">
-            @endif
-            <div class="overflow-hidden">
-                <p class="text-xs text-blue-300 leading-none">
-                    {{ auth()->user()->isSuperAdmin() ? config('brand.name') : 'Company' }}
-                </p>
-                <p class="text-sm font-semibold truncate leading-tight mt-0.5">
-                    {{ $company->name ?? config('brand.name') }}
-                </p>
-            </div>
+            {{-- Close button — mobile only --}}
+            <button onclick="closeSidebar()"
+                    class="lg:hidden flex-shrink-0 p-1 rounded-md text-blue-300 hover:text-white hover:bg-blue-800 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
         </div>
 
         {{-- Nav --}}
@@ -62,11 +64,11 @@
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                           {{ request()->routeIs('dashboard') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-  <rect x="3" y="3" width="7" height="8" rx="2"/>
-  <rect x="14" y="3" width="7" height="5" rx="2"/>
-  <rect x="14" y="12" width="7" height="9" rx="2"/>
-  <rect x="3" y="15" width="7" height="6" rx="2"/>
-</svg>
+                        <rect x="3" y="3" width="7" height="8" rx="2"/>
+                        <rect x="14" y="3" width="7" height="5" rx="2"/>
+                        <rect x="14" y="12" width="7" height="9" rx="2"/>
+                        <rect x="3" y="15" width="7" height="6" rx="2"/>
+                    </svg>
                     Dashboard
                 </a>
 
@@ -117,7 +119,7 @@
                 <a href="{{ route('payroll.index') }}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                           {{ request()->routeIs('payroll.*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
-                   <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <rect x="2" y="5" width="20" height="14" rx="2"/>
                         <path d="M2 10h20"/>
                         <path d="M6 15h3"/>
@@ -203,24 +205,37 @@
     </aside>
 
     {{-- MAIN CONTENT --}}
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {{-- TOP BAR --}}
-        <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
-            <div>
-                <h1 class="text-lg font-semibold text-gray-800">@yield('page-title', 'Dashboard')</h1>
-                <p class="text-xs text-gray-400 mt-0.5">@yield('page-subtitle', '')</p>
+        <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center gap-3 flex-shrink-0">
+
+            {{-- Hamburger — mobile & tablet only --}}
+            <button onclick="openSidebar()"
+                    class="lg:hidden flex-shrink-0 p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                <span class="sr-only">Open menu</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+
+            {{-- Page title --}}
+            <div class="flex-1 min-w-0">
+                <h1 class="text-base sm:text-lg font-semibold text-gray-800 truncate">@yield('page-title', 'Dashboard')</h1>
+                <p class="text-xs text-gray-400 truncate hidden sm:block">@yield('page-subtitle', '')</p>
             </div>
-            <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-500" id="current-datetime"></span>
-                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">
+
+            {{-- Right side: clock + avatar --}}
+            <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                <span class="text-xs sm:text-sm text-gray-500 hidden md:block" id="current-datetime"></span>
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
                     {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                 </div>
             </div>
         </header>
 
         {{-- PAGE CONTENT --}}
-        <main class="flex-1 overflow-y-auto p-6">
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6">
 
             {{-- Flash messages --}}
             @if(session('success'))
@@ -248,16 +263,43 @@
 </div>
 
 <script>
-    // Live clock in top bar
+    // Live clock — hidden on mobile to save space
     function updateClock() {
+        const el = document.getElementById('current-datetime');
+        if (!el) return;
         const now = new Date();
-        document.getElementById('current-datetime').textContent =
+        el.textContent =
             now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) +
             ' · ' +
             now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
     }
     setInterval(updateClock, 1000);
     updateClock();
+
+    function openSidebar() {
+        document.getElementById('sidebar').classList.remove('-translate-x-full');
+        document.getElementById('sidebar-backdrop').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebar-backdrop').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    // Close on ESC
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeSidebar();
+    });
+
+    // Restore normal scroll if resized to desktop
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1024) {
+            document.getElementById('sidebar-backdrop').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+    });
 </script>
 
 @yield('scripts')
