@@ -11,7 +11,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create a default company
+        // Seed licenses first
+        $this->call(LicenseSeeder::class);
+
+        // Create a default company (free plan — no license_id)
         $company = Company::create([
             'name' => 'Default Company',
             'logo' => null,

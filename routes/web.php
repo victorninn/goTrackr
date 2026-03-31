@@ -8,6 +8,11 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LicenseController;
+use App\Http\Controllers\DemoController;
+
+// Demo request (public)
+Route::post('/demo/request', [DemoController::class, 'store'])->name('demo.request');
 
 // Auth routes
 Route::get('/',       [AuthController::class, 'showLogin'])->name('login');
@@ -65,5 +70,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/admins/create',  [AdminController::class, 'create'])->name('admins.create');
         Route::post('/admins',        [AdminController::class, 'store'])->name('admins.store');
         Route::delete('/admins/{admin}', [AdminController::class, 'destroy'])->name('admins.destroy');
+    });
+
+    // License (Admin + Superadmin)
+    Route::middleware('role:superadmin,admin')->group(function () {
+        Route::get('/license',                          [LicenseController::class, 'show'])->name('license.show');
+        Route::post('/license/activate',                [LicenseController::class, 'activate'])->name('license.activate');
+    });
+
+    // License key management (Superadmin only)
+    Route::middleware('role:superadmin')->group(function () {
+        Route::post('/license/generate',                [LicenseController::class, 'generate'])->name('license.generate');
+        Route::delete('/license/keys/{licenseKey}',     [LicenseController::class, 'destroyKey'])->name('license.key.destroy');
     });
 });

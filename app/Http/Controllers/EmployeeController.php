@@ -51,6 +51,17 @@ class EmployeeController extends Controller
             $data['company_id'] = $user->company_id;
         }
 
+        // Enforce employee limit based on company license (superadmin is exempt)
+        if (! $user->isSuperAdmin()) {
+            $company = Company::with('license')->find($data['company_id']);
+
+            if ($company->hasReachedEmployeeLimit()) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['limit' => 'Employee limit reached for your license plan.']);
+            }
+        }
+
         $employeeRole = Role::where('name', 'employee')->first();
 
         User::create([

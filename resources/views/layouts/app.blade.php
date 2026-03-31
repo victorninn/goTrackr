@@ -41,7 +41,7 @@
                 </div>
             @else
                 {{-- Super Admin: goTrackr brand logo --}}
-                <img src="{{ Storage::url('logos/goTrackr.png') }}" alt="{{ config('brand.name') }}" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400">
+                <img src="{{ Storage::url('logos\goTrackr.png') }}" alt="{{ config('brand.name') }}" class="w-9 h-9 rounded-full object-cover border-2 border-blue-400">
             @endif
             <div class="overflow-hidden">
                 <p class="text-xs text-blue-300 leading-none">
@@ -137,6 +137,19 @@
                         <path d="M9 10h.01M15 10h.01M9 7h.01M15 7h.01"/>
                     </svg>
                     Companies
+                </a>
+
+                <a href="{{ route('license.show') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                          {{ request()->routeIs('license.*') ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white' }}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M20 12V22H4V12"/>
+                        <path d="M22 7H2v5h20V7z"/>
+                        <path d="M12 22V7"/>
+                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                    </svg>
+                    License
                 </a>
 
                 @endif

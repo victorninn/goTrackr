@@ -8,7 +8,17 @@
 <div class="max-w-xl">
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
 
-        @if($errors->any())
+        @if($errors->has('limit'))
+        <div class="mb-5 bg-orange-50 border border-orange-300 rounded-lg px-4 py-4 flex items-start gap-3">
+            <svg class="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+            </svg>
+            <div>
+                <p class="text-sm font-semibold text-orange-700">{{ $errors->first('limit') }}</p>
+                <a href="{{ route('license.show') }}" class="text-sm text-orange-600 underline mt-0.5 inline-block">Upgrade your license →</a>
+            </div>
+        </div>
+        @elseif($errors->any())
         <div class="mb-5 bg-red-50 border border-red-200 rounded-lg p-4">
             <ul class="text-sm text-red-700 space-y-1">
                 @foreach($errors->all() as $error)
