@@ -209,4 +209,67 @@ class TimeLogController extends Controller
 
     return view('logs.preview', compact('type', 'label', 'logs', 'totalHours', 'totalPay', 'user'));
 }
+
+public function create()
+{
+    $employees = User::all(); // or scope to non-admins
+    return view('logs.create', compact('employees'));
+}
+
+public function store(Request $request)
+{
+    $data = $request->validate([
+        'user_id'     => 'required|exists:users,id',
+        'date'        => 'required|date',
+        'clock_in'    => 'required',
+        'clock_out'   => 'nullable',
+        'description' => 'nullable|string|max:500',
+    ]);
+
+    // Auto-compute total_hours if clock_out is provided
+    if (!empty($data['clock_out'])) {
+        $in  = \Carbon\Carbon::parse($data['date'] . ' ' . $data['clock_in']);
+        $out = \Carbon\Carbon::parse($data['date'] . ' ' . $data['clock_out']);
+        $data['total_hours'] = round($in->diffInMinutes($out) / 60, 2);
+    }
+
+    TimeLog::create($data);
+
+    return redirect()->route('logs.index')->with('success', 'Time log created.');
+}
+
+public function edit(TimeLog $log)
+{
+    $employees = User::all();
+    return view('logs.edit', compact('log', 'employees'));
+}
+
+public function update(Request $request, TimeLog $log)
+{
+    $data = $request->validate([
+        'user_id'     => 'required|exists:users,id',
+        'date'        => 'required|date',
+        'clock_in'    => 'required',
+        'clock_out'   => 'nullable',
+        'description' => 'nullable|string|max:500',
+    ]);
+
+    if (!empty($data['clock_out'])) {
+        $in  = \Carbon\Carbon::parse($data['date'] . ' ' . $data['clock_in']);
+        $out = \Carbon\Carbon::parse($data['date'] . ' ' . $data['clock_out']);
+        $data['total_hours'] = round($in->diffInMinutes($out) / 60, 2);
+    } else {
+        $data['total_hours'] = null;
+    }
+
+    $log->update($data);
+
+    return redirect()->route('logs.index')->with('success', 'Time log updated.');
+}
+
+public function destroy(TimeLog $log)
+{
+    $log->delete();
+    return redirect()->route('logs.index')->with('success', 'Time log deleted.');
+}
 }

@@ -96,4 +96,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/license/generate',                [LicenseController::class, 'generate'])->name('license.generate');
         Route::delete('/license/keys/{licenseKey}',     [LicenseController::class, 'destroyKey'])->name('license.key.destroy');
     });
+
+
+    // Add these inside your authenticated routes group
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
+    Route::get('logs/create', [TimeLogController::class, 'create'])->name('logs.create');
+    Route::post('logs', [TimeLogController::class, 'store'])->name('logs.store');
+    Route::get('logs/{log}/edit', [TimeLogController::class, 'edit'])->name('logs.edit');
+    Route::put('logs/{log}', [TimeLogController::class, 'update'])->name('logs.update');
+    Route::delete('logs/{log}', [TimeLogController::class, 'destroy'])->name('logs.destroy');
+});
+
 });
