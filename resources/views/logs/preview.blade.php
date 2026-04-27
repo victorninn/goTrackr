@@ -6,17 +6,39 @@
 @section('content')
 
 {{-- Tab switcher --}}
-<div class="flex items-center gap-2 mb-5">
-    <a href="{{ route('logs.preview', ['type' => 'weekly']) }}"
-        class="px-5 py-2 rounded-full text-sm font-medium transition-colors
-        {{ $type === 'weekly' ? 'bg-blue-600 text-white shadow' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
-        📅 This Week
-    </a>
-    <a href="{{ route('logs.preview', ['type' => 'monthly']) }}"
-        class="px-5 py-2 rounded-full text-sm font-medium transition-colors
-        {{ $type === 'monthly' ? 'bg-blue-600 text-white shadow' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
-        📆 This Month
-    </a>
+<div class="flex flex-wrap items-center gap-2 mb-5">
+
+    {{-- Weekly tab with week picker --}}
+    <div class="relative">
+        <a href="{{ route('logs.preview', ['type' => 'weekly', 'week' => request('week')]) }}"
+            class="px-5 py-2 rounded-full text-sm font-medium transition-colors
+            {{ $type === 'weekly' ? 'bg-blue-600 text-white shadow' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
+            📅 Weekly
+        </a>
+    </div>
+
+    @if($type === 'weekly')
+    <input type="week"
+        value="{{ request('week', now()->format('Y-\WW')) }}"
+        onchange="window.location.href = '{{ route('logs.preview', ['type' => 'weekly']) }}&week=' + this.value"
+        class="border border-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer" />
+    @endif
+
+    {{-- Monthly tab with month picker --}}
+    <div class="relative">
+        <a href="{{ route('logs.preview', ['type' => 'monthly', 'month' => request('month')]) }}"
+            class="px-5 py-2 rounded-full text-sm font-medium transition-colors
+            {{ $type === 'monthly' ? 'bg-blue-600 text-white shadow' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
+            📆 Monthly
+        </a>
+    </div>
+
+    @if($type === 'monthly')
+    <input type="month"
+        value="{{ request('month', now()->format('Y-m')) }}"
+        onchange="window.location.href = '{{ route('logs.preview', ['type' => 'monthly']) }}&month=' + this.value"
+        class="border border-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer" />
+    @endif
 
     <div class="ml-auto flex items-center gap-2">
         {{-- Copy Link --}}
@@ -30,7 +52,7 @@
         </button>
 
         {{-- Export PDF --}}
-        <a href="{{ route('logs.export.my', ['type' => $type]) }}"
+        <a href="{{ route('logs.export.my', ['type' => $type, 'week' => request('week'), 'month' => request('month')]) }}"
             class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>

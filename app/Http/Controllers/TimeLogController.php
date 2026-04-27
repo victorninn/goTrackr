@@ -173,4 +173,40 @@ class TimeLogController extends Controller
             ->get();
         return [$logs, $label, $start, $end];
     }
+
+    public function preview(Request $request)
+{
+    $type = $request->get('type', 'weekly');
+    $user = auth()->user();
+
+    if ($type === 'weekly') {
+        // Parse ?week=2025-W15 or default to current week
+        if ($request->filled('week')) {
+            $start = Carbon::now()->setISODate(
+                ...array_map('intval', explode('-W', $request->week))
+            )->startOfDay();
+        } else {
+            $start = now()->startOfWeek();
+        }
+        $end   = $start->copy()->endOfWeek();
+        $label = $start->format('M d') . ' – ' . $end->format('M d, Y');
+
+    } else {
+        // Parse ?month=2025-04 or default to current month
+        $monthStr = $request->get('month', now()->format('Y-m'));
+        $start    = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth();
+        $end      = $start->copy()->endOfMonth();
+        $label    = $start->format('F Y');
+    }
+
+    $logs = $user->timeLogs()
+        ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+        ->orderBy('date')
+        ->get();
+
+    $totalHours = $logs->sum('total_hours');
+    $totalPay   = $totalHours * $user->hourly_rate;
+
+    return view('logs.preview', compact('type', 'label', 'logs', 'totalHours', 'totalPay', 'user'));
+}
 }
