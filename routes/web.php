@@ -23,6 +23,8 @@ Route::get('/',       [AuthController::class, 'showLogin'])->name('login');
 Route::get('/login',  [AuthController::class, 'showLogin']);
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
+Route::post('/logs/update-active-description', [TimeLogController::class, 'updateActiveDescription'])
+    ->name('logs.updateActiveDescription');
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {

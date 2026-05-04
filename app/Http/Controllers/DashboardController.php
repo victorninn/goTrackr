@@ -32,7 +32,7 @@ class DashboardController extends Controller
         $totalAdmins    = User::whereHas('role', fn($q) => $q->where('name', 'admin'))->count();
         $totalEmployees = User::whereHas('role', fn($q) => $q->where('name', 'employee'))->count();
         $totalCompanies = Company::count();
-        $recentLogs     = TimeLog::with('user.company')->latest()->take(10)->get();
+        $recentLogs     = TimeLog::with('user.company')->orderBy('date', 'desc')->orderBy('id', 'desc')->take(10)->get();
 
         return view('dashboard.superadmin', compact(
             'totalUsers', 'totalAdmins', 'totalEmployees', 'totalCompanies', 'recentLogs'
@@ -62,7 +62,7 @@ class DashboardController extends Controller
 
         $recentLogs = TimeLog::with('user')
             ->whereHas('user', fn($q) => $q->where('company_id', $user->company_id))
-            ->latest()->take(10)->get();
+            ->orderBy('date', 'desc')->orderBy('id', 'desc')->take(10)->get();
 
         return view('dashboard.admin', compact(
             'company', 'totalEmployees', 'weeklyHours', 'monthlyHours', 'recentLogs'
@@ -88,7 +88,7 @@ class DashboardController extends Controller
             ->sum('total_hours');
 
         $recentLogs = TimeLog::where('user_id', $user->id)
-            ->latest('date')->take(10)->get();
+            ->orderBy('date', 'desc')->orderBy('id', 'desc')->take(10)->get();
 
         return view('dashboard.employee', compact(
             'activeLog', 'weeklyHours', 'monthlyHours', 'recentLogs'

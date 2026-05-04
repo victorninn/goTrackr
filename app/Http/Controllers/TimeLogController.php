@@ -13,6 +13,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class TimeLogController extends Controller
 {
+
+
     public function clockIn(Request $request)
     {
         $user = Auth::user();
@@ -52,7 +54,7 @@ class TimeLogController extends Controller
         if ($request->filled('employee_id')) $query->where('user_id', $request->employee_id);
         if ($request->filled('date_from'))   $query->where('date', '>=', $request->date_from);
         if ($request->filled('date_to'))     $query->where('date', '<=', $request->date_to);
-        $logs = $query->orderBy('date', 'desc')->paginate(20)->withQueryString();
+        $logs = $query->orderBy('date', 'desc')->orderBy('id', 'desc')->paginate(20)->withQueryString();
         $employeesQuery = User::whereHas('role', fn($q) => $q->where('name', 'employee'));
         if ($user->isAdmin()) $employeesQuery->where('company_id', $user->company_id);
         $employees = $employeesQuery->get();
@@ -65,11 +67,10 @@ class TimeLogController extends Controller
         $query = TimeLog::where('user_id', $user->id);
         if ($request->filled('date_from')) $query->where('date', '>=', $request->date_from);
         if ($request->filled('date_to'))   $query->where('date', '<=', $request->date_to);
-        $logs = $query->orderBy('date', 'desc')->paginate(20)->withQueryString();
+        $logs = $query->orderBy('date', 'desc')->orderBy('id', 'desc')->paginate(20)->withQueryString();
         return view('logs.my', compact('logs'));
     }
 
-    // Preview logs before export (weekly/monthly tabs)
     public function previewLogs(Request $request)
     {
         $user = Auth::user();
@@ -80,7 +81,6 @@ class TimeLogController extends Controller
         return view('logs.preview', compact('logs', 'label', 'type', 'totalHours', 'totalPay', 'user', 'start', 'end'));
     }
 
-    // Generate a shareable invoice link
     public function shareInvoice(Request $request)
     {
         $user = Auth::user();
@@ -103,7 +103,6 @@ class TimeLogController extends Controller
         return response()->json(['link' => $link]);
     }
 
-    // Public invoice (no login)
     public function publicInvoice(string $token)
     {
         $share = InvoiceShare::where('token', $token)->firstOrFail();
@@ -113,7 +112,7 @@ class TimeLogController extends Controller
         $user = $share->user;
         $logs = TimeLog::where('user_id', $user->id)
             ->whereBetween('date', [$share->period_start, $share->period_end])
-            ->orderBy('date')
+            ->orderBy('date', 'desc')->orderBy('id', 'desc')
             ->get();
         $totalHours = $logs->sum('total_hours');
         $totalPay   = $logs->sum(fn($l) => $l->total_hours * $user->hourly_rate);
@@ -147,7 +146,7 @@ class TimeLogController extends Controller
             $label    = $start->format('F Y');
             $filename = 'invoice_monthly_' . $start->format('Ym') . '.pdf';
         }
-        $logs       = $query->whereBetween('date', [$start, $end])->orderBy('date')->get();
+        $logs       = $query->whereBetween('date', [$start, $end])->orderBy('date', 'desc')->orderBy('id', 'desc')->get();
         $totalHours = $logs->sum('total_hours');
         $totalPay   = $logs->sum(fn($l) => $l->total_hours * ($l->user->hourly_rate ?? 0));
         $employee   = $user->isEmployee() ? $user : ($logs->first()?->user ?? $user);
@@ -169,107 +168,122 @@ class TimeLogController extends Controller
         }
         $logs = TimeLog::where('user_id', $user->id)
             ->whereBetween('date', [$start, $end])
-            ->orderBy('date')
+            ->orderBy('date', 'desc')->orderBy('id', 'desc')
             ->get();
         return [$logs, $label, $start, $end];
     }
 
     public function preview(Request $request)
-{
-    $type = $request->get('type', 'weekly');
-    $user = auth()->user();
+    {
+        $type = $request->get('type', 'weekly');
+        $user = auth()->user();
 
-    if ($type === 'weekly') {
-        // Parse ?week=2025-W15 or default to current week
-        if ($request->filled('week')) {
-            $start = Carbon::now()->setISODate(
-                ...array_map('intval', explode('-W', $request->week))
-            )->startOfDay();
+        if ($type === 'weekly') {
+            if ($request->filled('week')) {
+                $start = Carbon::now()->setISODate(
+                    ...array_map('intval', explode('-W', $request->week))
+                )->startOfDay();
+            } else {
+                $start = now()->startOfWeek();
+            }
+            $end   = $start->copy()->endOfWeek();
+            $label = $start->format('M d') . ' – ' . $end->format('M d, Y');
         } else {
-            $start = now()->startOfWeek();
+            $monthStr = $request->get('month', now()->format('Y-m'));
+            $start    = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth();
+            $end      = $start->copy()->endOfMonth();
+            $label    = $start->format('F Y');
         }
-        $end   = $start->copy()->endOfWeek();
-        $label = $start->format('M d') . ' – ' . $end->format('M d, Y');
 
-    } else {
-        // Parse ?month=2025-04 or default to current month
-        $monthStr = $request->get('month', now()->format('Y-m'));
-        $start    = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth();
-        $end      = $start->copy()->endOfMonth();
-        $label    = $start->format('F Y');
+        $logs = $user->timeLogs()
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->orderBy('date', 'desc')->orderBy('id', 'desc')
+            ->get();
+
+        $totalHours = $logs->sum('total_hours');
+        $totalPay   = $totalHours * $user->hourly_rate;
+
+        return view('logs.preview', compact('type', 'label', 'logs', 'totalHours', 'totalPay', 'user'));
     }
 
-    $logs = $user->timeLogs()
-        ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-        ->orderBy('date')
-        ->get();
+    public function create()
+    {
+        $employees = User::all();
+        return view('logs.create', compact('employees'));
+    }
 
-    $totalHours = $logs->sum('total_hours');
-    $totalPay   = $totalHours * $user->hourly_rate;
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'user_id'     => 'required|exists:users,id',
+            'date'        => 'required|date',
+            'clock_in'    => 'required',
+            'clock_out'   => 'nullable',
+            'description' => 'nullable|string|max:500',
+        ]);
+        if (!empty($data['clock_out'])) {
+            $in  = Carbon::parse($data['date'] . ' ' . $data['clock_in']);
+            $out = Carbon::parse($data['date'] . ' ' . $data['clock_out']);
+            $data['total_hours'] = round($in->diffInMinutes($out) / 60, 2);
+        }
+        TimeLog::create($data);
+        return redirect()->route('logs.index')->with('success', 'Time log created.');
+    }
 
-    return view('logs.preview', compact('type', 'label', 'logs', 'totalHours', 'totalPay', 'user'));
-}
+    public function edit(TimeLog $log)
+    {
+        $employees = User::all();
+        return view('logs.edit', compact('log', 'employees'));
+    }
 
-public function create()
+    
+
+    public function update(Request $request, TimeLog $log)
+    {
+        $data = $request->validate([
+            'user_id'     => 'required|exists:users,id',
+            'date'        => 'required|date',
+            'clock_in'    => 'required',
+            'clock_out'   => 'nullable',
+            'description' => 'nullable|string|max:500',
+        ]);
+        if (!empty($data['clock_out'])) {
+            $in  = Carbon::parse($data['date'] . ' ' . $data['clock_in']);
+            $out = Carbon::parse($data['date'] . ' ' . $data['clock_out']);
+            $data['total_hours'] = round($in->diffInMinutes($out) / 60, 2);
+        } else {
+            $data['total_hours'] = null;
+        }
+        $log->update($data);
+        return redirect()->route('logs.index')->with('success', 'Time log updated.');
+    }
+
+    
+
+    public function destroy(TimeLog $log)
+    {
+        $log->delete();
+        return redirect()->route('logs.index')->with('success', 'Time log deleted.');
+    }
+
+
+    public function updateActiveDescription(Request $request)
 {
-    $employees = User::all(); // or scope to non-admins
-    return view('logs.create', compact('employees'));
-}
-
-public function store(Request $request)
-{
-    $data = $request->validate([
-        'user_id'     => 'required|exists:users,id',
-        'date'        => 'required|date',
-        'clock_in'    => 'required',
-        'clock_out'   => 'nullable',
-        'description' => 'nullable|string|max:500',
+    $request->validate([
+        'description' => 'nullable|string|max:500'
     ]);
 
-    // Auto-compute total_hours if clock_out is provided
-    if (!empty($data['clock_out'])) {
-        $in  = \Carbon\Carbon::parse($data['date'] . ' ' . $data['clock_in']);
-        $out = \Carbon\Carbon::parse($data['date'] . ' ' . $data['clock_out']);
-        $data['total_hours'] = round($in->diffInMinutes($out) / 60, 2);
+    $user = Auth::user();
+    $log  = $user->activeLog(); // you already use this 👍
+
+    if (!$log) {
+        return back()->with('error', 'No active session.');
     }
 
-    TimeLog::create($data);
+    $log->description = $request->description;
+    $log->save();
 
-    return redirect()->route('logs.index')->with('success', 'Time log created.');
+    return back()->with('success', 'Description updated.');
 }
-
-public function edit(TimeLog $log)
-{
-    $employees = User::all();
-    return view('logs.edit', compact('log', 'employees'));
-}
-
-public function update(Request $request, TimeLog $log)
-{
-    $data = $request->validate([
-        'user_id'     => 'required|exists:users,id',
-        'date'        => 'required|date',
-        'clock_in'    => 'required',
-        'clock_out'   => 'nullable',
-        'description' => 'nullable|string|max:500',
-    ]);
-
-    if (!empty($data['clock_out'])) {
-        $in  = \Carbon\Carbon::parse($data['date'] . ' ' . $data['clock_in']);
-        $out = \Carbon\Carbon::parse($data['date'] . ' ' . $data['clock_out']);
-        $data['total_hours'] = round($in->diffInMinutes($out) / 60, 2);
-    } else {
-        $data['total_hours'] = null;
-    }
-
-    $log->update($data);
-
-    return redirect()->route('logs.index')->with('success', 'Time log updated.');
-}
-
-public function destroy(TimeLog $log)
-{
-    $log->delete();
-    return redirect()->route('logs.index')->with('success', 'Time log deleted.');
-}
+    
 }
