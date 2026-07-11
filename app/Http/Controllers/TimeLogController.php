@@ -81,27 +81,44 @@ class TimeLogController extends Controller
         return view('logs.preview', compact('logs', 'label', 'type', 'totalHours', 'totalPay', 'user', 'start', 'end'));
     }
 
-    public function shareInvoice(Request $request)
-    {
-        $user = Auth::user();
-        $type = $request->get('type', 'monthly');
-        [$logs, $label, $start, $end] = $this->buildLogQuery($user, $type);
-        InvoiceShare::where('user_id', $user->id)
-            ->where('type', $type)
-            ->where('period_start', $start->toDateString())
-            ->delete();
-        $share = InvoiceShare::create([
-            'user_id'      => $user->id,
-            'token'        => Str::random(48),
-            'type'         => $type,
-            'period_start' => $start->toDateString(),
-            'period_end'   => $end->toDateString(),
-            'label'        => $label,
-            'expires_at'   => Carbon::now()->addDays(30),
-        ]);
-        $link = route('invoice.public', $share->token);
-        return response()->json(['link' => $link]);
+public function shareInvoice(Request $request)
+{
+    $user = Auth::user();
+    $type = $request->get('type', 'monthly');
+
+    if ($type === 'weekly') {
+        if ($request->filled('week')) {
+            [$year, $week] = array_map('intval', explode('-W', $request->week));
+            $start = Carbon::now()->setISODate($year, $week)->startOfWeek()->startOfDay();
+        } else {
+            $start = Carbon::now()->startOfWeek()->startOfDay();
+        }
+        $end   = $start->copy()->endOfWeek();
+        $label = 'Week of ' . $start->format('M d') . ' – ' . $end->format('M d, Y');
+    } else {
+        $monthStr = $request->get('month', now()->format('Y-m'));
+        $start    = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth()->startOfDay();
+        $end      = $start->copy()->endOfMonth();
+        $label    = $start->format('F Y');
     }
+
+    InvoiceShare::where('user_id', $user->id)
+        ->where('type', $type)
+        ->where('period_start', $start->toDateString())
+        ->delete();
+
+    $share = InvoiceShare::create([
+        'user_id'      => $user->id,
+        'token'        => Str::random(48),
+        'type'         => $type,
+        'period_start' => $start->toDateString(),
+        'period_end'   => $end->toDateString(),
+        'label'        => $label,
+        'expires_at'   => Carbon::now()->addDays(30),
+    ]);
+
+    return response()->json(['link' => route('invoice.public', $share->token)]);
+}
 
     public function publicInvoice(string $token)
     {
@@ -121,57 +138,76 @@ class TimeLogController extends Controller
         return view('logs.invoice-public', compact('logs', 'user', 'label', 'type', 'totalHours', 'totalPay', 'share'));
     }
 
-    public function export(Request $request)
-    {
-        $user   = Auth::user();
-        $type   = $request->get('type', 'monthly');
-        $userId = $request->get('user_id');
-        $query  = TimeLog::with('user');
-        if ($user->isEmployee()) {
-            $query->where('user_id', $user->id);
-        } elseif ($user->isAdmin()) {
-            $query->whereHas('user', fn($q) => $q->where('company_id', $user->company_id));
-            if ($userId) $query->where('user_id', $userId);
-        } else {
-            if ($userId) $query->where('user_id', $userId);
-        }
-        if ($type === 'weekly') {
-            $start    = Carbon::now()->startOfWeek();
-            $end      = Carbon::now()->endOfWeek();
-            $label    = 'Week of ' . $start->format('M d') . ' – ' . $end->format('M d, Y');
-            $filename = 'invoice_weekly_' . $start->format('Ymd') . '.pdf';
-        } else {
-            $start    = Carbon::now()->startOfMonth();
-            $end      = Carbon::now()->endOfMonth();
-            $label    = $start->format('F Y');
-            $filename = 'invoice_monthly_' . $start->format('Ym') . '.pdf';
-        }
-        $logs       = $query->whereBetween('date', [$start, $end])->orderBy('date', 'desc')->orderBy('id', 'desc')->get();
-        $totalHours = $logs->sum('total_hours');
-        $totalPay   = $logs->sum(fn($l) => $l->total_hours * ($l->user->hourly_rate ?? 0));
-        $employee   = $user->isEmployee() ? $user : ($logs->first()?->user ?? $user);
-        $pdf = Pdf::loadView('logs.export-pdf', compact('logs', 'label', 'type', 'totalHours', 'totalPay', 'employee'))
-            ->setPaper('a4', 'portrait');
-        return $pdf->download($filename);
+public function export(Request $request)
+{
+    $user   = Auth::user();
+    $type   = $request->get('type', 'monthly');
+    $userId = $request->get('user_id');
+
+    $query = TimeLog::with('user');
+    if ($user->isEmployee()) {
+        $query->where('user_id', $user->id);
+    } elseif ($user->isAdmin()) {
+        $query->whereHas('user', fn($q) => $q->where('company_id', $user->company_id));
+        if ($userId) $query->where('user_id', $userId);
+    } else {
+        if ($userId) $query->where('user_id', $userId);
     }
 
-    private function buildLogQuery(User $user, string $type): array
-    {
-        if ($type === 'weekly') {
-            $start = Carbon::now()->startOfWeek();
-            $end   = Carbon::now()->endOfWeek();
-            $label = 'Week of ' . $start->format('M d') . ' – ' . $end->format('M d, Y');
+    if ($type === 'weekly') {
+        if ($request->filled('week')) {
+            [$year, $week] = array_map('intval', explode('-W', $request->week));
+            $start = Carbon::now()->setISODate($year, $week)->startOfWeek()->startOfDay();
         } else {
-            $start = Carbon::now()->startOfMonth();
-            $end   = Carbon::now()->endOfMonth();
-            $label = $start->format('F Y');
+            $start = Carbon::now()->startOfWeek()->startOfDay();
         }
-        $logs = TimeLog::where('user_id', $user->id)
-            ->whereBetween('date', [$start, $end])
-            ->orderBy('date', 'desc')->orderBy('id', 'desc')
-            ->get();
-        return [$logs, $label, $start, $end];
+        $end      = $start->copy()->endOfWeek();
+        $label    = 'Week of ' . $start->format('M d') . ' – ' . $end->format('M d, Y');
+        $filename = 'invoice_weekly_' . $start->format('Ymd') . '.pdf';
+    } else {
+        $monthStr = $request->get('month', now()->format('Y-m'));
+        $start    = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth()->startOfDay();
+        $end      = $start->copy()->endOfMonth();
+        $label    = $start->format('F Y');
+        $filename = 'invoice_monthly_' . $start->format('Ym') . '.pdf';
     }
+
+    $logs       = $query->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+                        ->orderBy('date', 'desc')->orderBy('id', 'desc')->get();
+    $totalHours = $logs->sum('total_hours');
+    $totalPay   = $logs->sum(fn($l) => $l->total_hours * ($l->user->hourly_rate ?? 0));
+    $employee   = $user->isEmployee() ? $user : ($logs->first()?->user ?? $user);
+
+    $pdf = Pdf::loadView('logs.export-pdf', compact('logs', 'label', 'type', 'totalHours', 'totalPay', 'employee'))
+        ->setPaper('a4', 'portrait');
+    return $pdf->download($filename);
+}
+
+private function buildLogQuery(User $user, string $type, ?string $week = null, ?string $month = null): array
+{
+    if ($type === 'weekly') {
+        if ($week) {
+            [$year, $w] = array_map('intval', explode('-W', $week));
+            $start = Carbon::now()->setISODate($year, $w)->startOfWeek()->startOfDay();
+        } else {
+            $start = Carbon::now()->startOfWeek()->startOfDay();
+        }
+        $end   = $start->copy()->endOfWeek();
+        $label = 'Week of ' . $start->format('M d') . ' – ' . $end->format('M d, Y');
+    } else {
+        $monthStr = $month ?? now()->format('Y-m');
+        $start    = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth()->startOfDay();
+        $end      = $start->copy()->endOfMonth();
+        $label    = $start->format('F Y');
+    }
+
+    $logs = TimeLog::where('user_id', $user->id)
+        ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+        ->orderBy('date', 'desc')->orderBy('id', 'desc')
+        ->get();
+
+    return [$logs, $label, $start, $end];
+}
 
     public function preview(Request $request)
     {

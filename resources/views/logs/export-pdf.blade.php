@@ -3,17 +3,33 @@
 <head>
     <meta charset="utf-8">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans, Helvetica, sans-serif; font-size: 11px; color: #1f2937; background: #fff; }
+@font-face {
+    font-family: 'Poppins';
+    font-weight: 400;
+    src: url("{{ storage_path('fonts/Poppins-Regular.ttf') }}") format('truetype');
+}
+@font-face {
+    font-family: 'Poppins';
+    font-weight: 600;
+    src: url("{{ storage_path('fonts/Poppins-SemiBold.ttf') }}") format('truetype');
+}
+@font-face {
+    font-family: 'Poppins';
+    font-weight: 700;
+    src: url("{{ storage_path('fonts/Poppins-Bold.ttf') }}") format('truetype');
+}
 
-        .hero { background: #1d4ed8; color: #fff; padding: 28px 32px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Poppins, Helvetica, sans-serif; font-size: 11px; color: #1f2937; background: #fff; }
+
+        .hero { background: #011F4B; color: #fff; padding: 28px 32px; }
         .hero-inner { display: table; width: 100%; }
         .hero-left  { display: table-cell; vertical-align: top; }
         .hero-right { display: table-cell; vertical-align: top; text-align: right; }
         .brand { font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #93c5fd; margin-bottom: 6px; }
-        .employee-name { font-size: 20px; font-weight: 700; color: #fff; }
-        .employee-sub  { font-size: 10px; color: #bfdbfe; margin-top: 3px; }
-        .amount-label  { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #93c5fd; margin-bottom: 4px; }
+        .employee-name { font-size: 22px; font-weight: 700; color: #fff; }
+        .employee-sub  { font-size: 12px; color: #bfdbfe; margin-top: 3px; }
+        .amount-label  { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #93c5fd; margin-bottom: 4px; }
         .amount-value  { font-size: 26px; font-weight: 700; color: #fff; }
         .period-text   { font-size: 10px; color: #bfdbfe; margin-top: 4px; }
 
@@ -21,15 +37,15 @@
         .meta-cell { display: table-cell; padding: 10px 20px; border-right: 1px solid #e5e7eb; width: 33.33%; }
         .meta-cell:last-child { border-right: none; }
         .meta-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #9ca3af; margin-bottom: 3px; }
-        .meta-value { font-size: 11px; font-weight: 600; color: #374151; }
+        .meta-value { font-size: 12px; font-weight: 600; color: #374151; }
 
         .section-pad { padding: 0 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 12px; }
         thead tr { border-bottom: 2px solid #e5e7eb; }
-        thead th { padding: 7px 8px; text-align: left; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #6b7280; }
+        thead th { padding: 7px 8px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #6b7280; }
         thead th.r { text-align: right; }
         tbody tr { border-bottom: 1px solid #f3f4f6; }
-        tbody td { padding: 7px 8px; font-size: 10.5px; color: #374151; }
+        tbody td { padding: 7px 8px; font-size: 12px; color: #374151; }
         tbody td.r { text-align: right; }
         tbody td.amount { text-align: right; font-weight: 600; color: #111827; }
         tbody td.muted { color: #9ca3af; }

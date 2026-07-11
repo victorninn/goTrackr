@@ -16,7 +16,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen py-10 px-4">
 
-<div class="max-w-2xl mx-auto">
+<div class="max-w-7xl mx-auto">
 
     {{-- Toolbar (hidden on print) --}}
     <div class="no-print flex items-center justify-between mb-5">
@@ -43,7 +43,7 @@
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
 
         {{-- Header stripe --}}
-        <div class="bg-gradient-to-r from-blue-700 to-blue-500 px-8 py-7 text-white">
+        <div class="bg-gradient-to-r from-blue-700 to-blue-900 px-8 py-7 text-white">
             <div class="flex justify-between items-center">
                 <div>
                     <div class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-2">Invoice</div>

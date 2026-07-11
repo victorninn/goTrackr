@@ -37,7 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/clock-out', [TimeLogController::class, 'clockOut'])->name('clock.out');
     Route::get('/my-logs',    [TimeLogController::class, 'myLogs'])->name('logs.my');
     Route::get('/my-logs/export', [TimeLogController::class, 'export'])->name('logs.export.my');
-    Route::get('/my-logs/preview', [TimeLogController::class, 'previewLogs'])->name('logs.preview');
+    Route::get('/my-logs/preview', [TimeLogController::class, 'preview'])->name('logs.preview');
     Route::post('/my-logs/share', [TimeLogController::class, 'shareInvoice'])->name('logs.share');
 
     // Employee Settings

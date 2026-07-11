@@ -77,7 +77,7 @@
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
     {{-- Invoice header --}}
-    <div class="bg-gradient-to-r from-blue-700 to-blue-500 px-8 py-6 text-white">
+    <div class="bg-gradient-to-r from-blue-700 to-blue-900 px-8 py-6 text-white">
         <div class="flex justify-between items-start">
             <div>
                 <p class="text-blue-200 text-xs font-semibold uppercase tracking-widest mb-1">Invoice Preview</p>
@@ -178,8 +178,10 @@
 
 <script>
 function generateShareLink(type) {
-    const btn  = document.getElementById('btn-share');
-    const text = document.getElementById('share-btn-text');
+    const btn    = document.getElementById('btn-share');
+    const text   = document.getElementById('share-btn-text');
+    const params = new URLSearchParams(window.location.search);
+
     text.textContent = 'Generating…';
     btn.disabled = true;
 
@@ -189,7 +191,11 @@ function generateShareLink(type) {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': '{{ csrf_token() }}'
         },
-        body: JSON.stringify({ type })
+        body: JSON.stringify({
+            type:  type,
+            week:  params.get('week'),
+            month: params.get('month')
+        })
     })
     .then(r => r.json())
     .then(data => {
