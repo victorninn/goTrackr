@@ -4,23 +4,23 @@
     <meta charset="utf-8">
     <style>
 @font-face {
-    font-family: 'Poppins';
+    font-family: 'Plus Jakarta Sans';
     font-weight: 400;
-    src: url("{{ storage_path('fonts/Poppins-Regular.ttf') }}") format('truetype');
+    src: url("{{ storage_path('fonts/PlusJakartaSans-Regular.ttf') }}") format('truetype');
 }
 @font-face {
-    font-family: 'Poppins';
+    font-family: 'Plus Jakarta Sans SemiBold';
     font-weight: 600;
-    src: url("{{ storage_path('fonts/Poppins-SemiBold.ttf') }}") format('truetype');
+    src: url("{{ storage_path('fonts/PlusJakartaSans-SemiBold.ttf') }}") format('truetype');
 }
 @font-face {
-    font-family: 'Poppins';
+    font-family: 'Plus Jakarta Sans Bold';
     font-weight: 700;
-    src: url("{{ storage_path('fonts/Poppins-Bold.ttf') }}") format('truetype');
+    src: url("{{ storage_path('fonts/PlusJakartaSans-Bold.ttf') }}") format('truetype');
 }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Poppins, Helvetica, sans-serif; font-size: 11px; color: #1f2937; background: #fff; }
+        body { font-family: Plus Jakarta Sans, Helvetica, sans-serif; font-size: 11px; color: #1f2937; background: #fff; }
 
         .hero { background: #011F4B; color: #fff; padding: 28px 32px; }
         .hero-inner { display: table; width: 100%; }
