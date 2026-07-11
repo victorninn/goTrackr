@@ -19,10 +19,26 @@
             <div class="bg-white/10 rounded-xl p-4 mb-5">
                 <p class="text-blue-200 text-xs mb-1">Clocked in at</p>
                 <p class="text-xl font-semibold">{{ \Carbon\Carbon::parse($activeLog->clock_in)->format('h:i A') }}</p>
-                @if($activeLog->description)
-                    <p class="text-blue-200 text-xs mt-2">Working on</p>
-                    <p class="text-sm text-white/90 mt-0.5 italic">{{ $activeLog->description }}</p>
-                @endif
+                <p class="text-blue-200 text-xs mt-2">Working on</p>
+
+<form method="POST" action="http://127.0.0.1:8000/logs/update-active-description">
+    <input type="hidden" name="_token" value="TCrxG54y8ALwKPz8vOan1flc5Dr3UQDARmKVEbUw" autocomplete="off">
+
+    <textarea 
+        name="description" 
+        rows="2" 
+        class="w-full bg-white/10 text-white placeholder-blue-300 border border-white/20 rounded-xl px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-white/40 resize-none" 
+        placeholder="What are you working on?"
+    ></textarea>
+
+    <div class="flex justify-end mt-2">
+        <button 
+            type="submit" 
+            class="bg-blue-400 hover:bg-yellow-500 text-white text-xs font-semibold py-2 px-4 rounded-lg transition">
+            Update Task
+        </button>
+    </div>
+</form>
                 <p class="text-blue-200 text-xs mt-2">Elapsed time</p>
                 <p class="text-2xl font-mono font-bold text-yellow-300" id="elapsed-timer">00:00:00</p>
             </div>

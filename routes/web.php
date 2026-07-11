@@ -10,15 +10,21 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\DemoController;
+use App\Http\Controllers\EmployeeSettingsController;
 
 // Demo request (public)
 Route::post('/demo/request', [DemoController::class, 'store'])->name('demo.request');
+
+// Public shareable invoice (no login required)
+Route::get('/invoice/{token}', [TimeLogController::class, 'publicInvoice'])->name('invoice.public');
 
 // Auth routes
 Route::get('/',       [AuthController::class, 'showLogin'])->name('login');
 Route::get('/login',  [AuthController::class, 'showLogin']);
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
+Route::post('/logs/update-active-description', [TimeLogController::class, 'updateActiveDescription'])
+    ->name('logs.updateActiveDescription');
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {
@@ -31,6 +37,15 @@ Route::middleware('auth')->group(function () {
     Route::post('/clock-out', [TimeLogController::class, 'clockOut'])->name('clock.out');
     Route::get('/my-logs',    [TimeLogController::class, 'myLogs'])->name('logs.my');
     Route::get('/my-logs/export', [TimeLogController::class, 'export'])->name('logs.export.my');
+    Route::get('/my-logs/preview', [TimeLogController::class, 'preview'])->name('logs.preview');
+    Route::post('/my-logs/share', [TimeLogController::class, 'shareInvoice'])->name('logs.share');
+
+    // Employee Settings
+    Route::middleware('role:employee')->group(function () {
+        Route::get('/settings',                  [EmployeeSettingsController::class, 'show'])->name('employee.settings');
+        Route::post('/settings/password',        [EmployeeSettingsController::class, 'updatePassword'])->name('employee.settings.password');
+        Route::post('/settings/payment',         [EmployeeSettingsController::class, 'updatePayment'])->name('employee.settings.payment');
+    });
 
     // Logs (Admin + Superadmin)
     Route::middleware('role:superadmin,admin')->group(function () {
@@ -83,4 +98,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/license/generate',                [LicenseController::class, 'generate'])->name('license.generate');
         Route::delete('/license/keys/{licenseKey}',     [LicenseController::class, 'destroyKey'])->name('license.key.destroy');
     });
+
+
+    // Add these inside your authenticated routes group
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
+    Route::get('logs/create', [TimeLogController::class, 'create'])->name('logs.create');
+    Route::post('logs', [TimeLogController::class, 'store'])->name('logs.store');
+    Route::get('logs/{log}/edit', [TimeLogController::class, 'edit'])->name('logs.edit');
+    Route::put('logs/{log}', [TimeLogController::class, 'update'])->name('logs.update');
+    Route::delete('logs/{log}', [TimeLogController::class, 'destroy'])->name('logs.destroy');
+});
+
 });
