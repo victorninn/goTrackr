@@ -160,17 +160,28 @@
             Pay with PayPal →
         </a>
     </div>
-    @elseif($user->payment_method === 'wise' && $user->wise_id)
-    <div class="border-t border-gray-100 px-8 py-4 bg-green-50 flex items-center gap-3">
-        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
-        </svg>
-        <span class="text-sm text-gray-600">Pay via Wise to:</span>
-        <span class="text-sm font-semibold text-green-700">{{ $user->wise_id }}</span>
-        <a href="https://wise.com/pay" target="_blank"
-            class="ml-auto flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors">
-            Pay with Wise →
-        </a>
+    @elseif($user->payment_method === 'wise' && ($user->wise_account_no || $user->wise_account_name))
+    <div class="border-t border-gray-100 px-8 py-4 bg-green-50">
+        <div class="flex items-center gap-3 mb-2">
+            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
+            </svg>
+            <span class="text-sm text-gray-600">Bank Transfer (Wise)</span>
+        </div>
+        <div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm pl-7">
+            @if($user->wise_account_name)
+            <div><span class="text-gray-500">Account name:</span> <span class="font-semibold text-gray-800">{{ $user->wise_account_name }}</span></div>
+            @endif
+            @if($user->wise_account_no)
+            <div><span class="text-gray-500">Account no.:</span> <span class="font-semibold text-gray-800">{{ $user->wise_account_no }}</span></div>
+            @endif
+            @if($user->wise_routing_no)
+            <div><span class="text-gray-500">Routing no.:</span> <span class="font-semibold text-gray-800">{{ $user->wise_routing_no }}</span></div>
+            @endif
+            @if($user->wise_swift_bic)
+            <div><span class="text-gray-500">Swift / BIC:</span> <span class="font-semibold text-gray-800">{{ $user->wise_swift_bic }}</span></div>
+            @endif
+        </div>
     </div>
     @endif
 

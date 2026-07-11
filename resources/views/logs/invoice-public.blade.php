@@ -46,7 +46,7 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
         <div class="bg-gradient-to-r from-blue-700 to-blue-900 px-8 py-7 text-white">
             <div class="flex justify-between items-center">
                 <div>
-                    <div class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-2">Invoice</div>
+                    <div class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-2">Invoice #{{ $share->formatted_number }}</div>
                     <h1 class="text-2xl font-bold tracking-tight">{{ $user->name }}</h1>
                     <p class="text-blue-200 text-sm mt-0.5">{{ $user->email }}</p>
                     @if($user->company)
@@ -145,22 +145,24 @@ body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
             </div>
         </div>
 
-        @elseif($user->payment_method === 'wise' && $user->wise_id)
+        @elseif($user->payment_method === 'wise' && ($user->wise_account_no || $user->wise_account_name))
         <div class="border-t-2 border-green-100 bg-green-50 px-8 py-5">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <p class="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">Pay with Wise</p>
-                    <p class="text-sm text-gray-600">Send to: <span class="font-semibold text-gray-800">{{ $user->wise_id }}</span></p>
-                    <p class="text-xs text-gray-400 mt-0.5">Amount: <strong>${{ number_format($totalPay, 2) }}</strong></p>
-                </div>
-                <a href="https://wise.com/pay/me/{{ urlencode($user->wise_id) }}" target="_blank"
-                    class="inline-flex items-center gap-2 bg-[#00b9a0] hover:bg-[#009e8a] text-white px-6 py-3 rounded-xl font-semibold text-sm transition-colors shadow-sm no-print">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.25 8.25l-3 9-3-6-3 6-3-9h1.5l1.5 4.5 3-6 3 6 1.5-4.5z"/>
-                    </svg>
-                    Pay ${{ number_format($totalPay, 2) }} via Wise
-                </a>
+            <p class="text-xs font-semibold text-green-600 uppercase tracking-wide mb-3">Bank Transfer (Wise)</p>
+            <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                @if($user->wise_account_name)
+                <div><span class="text-gray-500">Account name:</span> <span class="font-semibold text-gray-800">{{ $user->wise_account_name }}</span></div>
+                @endif
+                @if($user->wise_account_no)
+                <div><span class="text-gray-500">Account no.:</span> <span class="font-semibold text-gray-800">{{ $user->wise_account_no }}</span></div>
+                @endif
+                @if($user->wise_routing_no)
+                <div><span class="text-gray-500">Routing no.:</span> <span class="font-semibold text-gray-800">{{ $user->wise_routing_no }}</span></div>
+                @endif
+                @if($user->wise_swift_bic)
+                <div><span class="text-gray-500">Swift / BIC:</span> <span class="font-semibold text-gray-800">{{ $user->wise_swift_bic }}</span></div>
+                @endif
             </div>
+            <p class="text-xs text-gray-400 mt-2">Amount: <strong>${{ number_format($totalPay, 2) }}</strong></p>
         </div>
         @endif
 

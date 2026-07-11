@@ -102,19 +102,30 @@ public function shareInvoice(Request $request)
         $label    = $start->format('F Y');
     }
 
+    // Reuse the existing invoice number if this exact period is being re-shared,
+    // otherwise hand out the next sequential number for this employee (starts at 1 -> "0001").
+    $existing = InvoiceShare::where('user_id', $user->id)
+        ->where('type', $type)
+        ->where('period_start', $start->toDateString())
+        ->first();
+
+    $invoiceNumber = $existing->invoice_number
+        ?? ((InvoiceShare::where('user_id', $user->id)->max('invoice_number') ?? 0) + 1);
+
     InvoiceShare::where('user_id', $user->id)
         ->where('type', $type)
         ->where('period_start', $start->toDateString())
         ->delete();
 
     $share = InvoiceShare::create([
-        'user_id'      => $user->id,
-        'token'        => Str::random(48),
-        'type'         => $type,
-        'period_start' => $start->toDateString(),
-        'period_end'   => $end->toDateString(),
-        'label'        => $label,
-        'expires_at'   => Carbon::now()->addDays(30),
+        'user_id'        => $user->id,
+        'invoice_number' => $invoiceNumber,
+        'token'          => Str::random(48),
+        'type'           => $type,
+        'period_start'   => $start->toDateString(),
+        'period_end'     => $end->toDateString(),
+        'label'          => $label,
+        'expires_at'     => Carbon::now()->addDays(30),
     ]);
 
     return response()->json(['link' => route('invoice.public', $share->token)]);

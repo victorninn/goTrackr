@@ -37,15 +37,23 @@ class EmployeeSettingsController extends Controller
     public function updatePayment(Request $request)
     {
         $request->validate([
-            'payment_method' => ['nullable', 'in:paypal,wise'],
-            'paypal_id'      => ['nullable', 'string', 'max:255'],
-            'wise_id'        => ['nullable', 'string', 'max:255'],
+            'payment_method'     => ['nullable', 'in:paypal,wise'],
+            'paypal_id'          => ['nullable', 'string', 'max:255'],
+            'wise_id'            => ['nullable', 'string', 'max:255'],
+            'wise_account_name'  => ['nullable', 'string', 'max:255'],
+            'wise_account_no'    => ['nullable', 'string', 'max:255'],
+            'wise_routing_no'    => ['nullable', 'string', 'max:255'],
+            'wise_swift_bic'     => ['nullable', 'string', 'max:255'],
         ]);
 
         $user = Auth::user();
-        $user->payment_method = $request->payment_method;
-        $user->paypal_id      = $request->paypal_id;
-        $user->wise_id        = $request->wise_id;
+        $user->payment_method    = $request->payment_method;
+        $user->paypal_id         = $request->paypal_id;
+        $user->wise_id           = $request->wise_id;
+        $user->wise_account_name = $request->wise_account_name;
+        $user->wise_account_no   = $request->wise_account_no;
+        $user->wise_routing_no   = $request->wise_routing_no;
+        $user->wise_swift_bic    = $request->wise_swift_bic;
         $user->save();
 
         return back()->with('success_payment', 'Payment settings updated successfully.');

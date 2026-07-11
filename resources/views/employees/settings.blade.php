@@ -142,19 +142,50 @@
             </div>
 
             {{-- Wise ID field --}}
-            <div id="field-wise" class="{{ old('payment_method', $user->payment_method) === 'wise' ? '' : 'hidden' }} mb-4">
-                <label class="block text-xs font-medium text-gray-500 mb-1">Wise Email / Username</label>
-                <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-                        </svg>
-                    </span>
-                    <input type="text" name="wise_id" value="{{ old('wise_id', $user->wise_id) }}"
-                        placeholder="your@wise.email"
-                        class="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div id="field-wise" class="{{ old('payment_method', $user->payment_method) === 'wise' ? '' : 'hidden' }} mb-4 space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Wise Email / Username</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                        </span>
+                        <input type="text" name="wise_id" value="{{ old('wise_id', $user->wise_id) }}"
+                            placeholder="your@wise.email"
+                            class="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
                 </div>
-                <p class="mt-1 text-xs text-gray-400">Clients will see a "Pay via Wise" link on your invoice.</p>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Account name</label>
+                    <input type="text" name="wise_account_name" value="{{ old('wise_account_name', $user->wise_account_name) }}"
+                        placeholder="Full name on the account"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Account no.</label>
+                    <input type="text" name="wise_account_no" value="{{ old('wise_account_no', $user->wise_account_no) }}"
+                        placeholder="Account number"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Routing no.</label>
+                    <input type="text" name="wise_routing_no" value="{{ old('wise_routing_no', $user->wise_routing_no) }}"
+                        placeholder="Routing number"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Swift / BIC</label>
+                    <input type="text" name="wise_swift_bic" value="{{ old('wise_swift_bic', $user->wise_swift_bic) }}"
+                        placeholder="Swift / BIC code"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <p class="text-xs text-gray-400">These bank details will show on your invoice. The direct "Pay with Wise" link is temporarily disabled.</p>
             </div>
 
             <button type="submit"

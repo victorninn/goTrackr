@@ -13,6 +13,7 @@ class User extends Authenticatable
         'name', 'email', 'password',
         'role_id', 'company_id', 'hourly_rate',
         'payment_method', 'paypal_id', 'wise_id',
+        'wise_account_name', 'wise_account_no', 'wise_routing_no', 'wise_swift_bic',
     ];
 
     protected $hidden = ['password', 'remember_token'];
