@@ -21,15 +21,15 @@
                 <p class="text-xl font-semibold">{{ \Carbon\Carbon::parse($activeLog->clock_in)->format('h:i A') }}</p>
                 <p class="text-blue-200 text-xs mt-2">Working on</p>
 
-<form method="POST" action="http://127.0.0.1:8000/logs/update-active-description">
-    <input type="hidden" name="_token" value="TCrxG54y8ALwKPz8vOan1flc5Dr3UQDARmKVEbUw" autocomplete="off">
+<form method="POST" action="{{ route('logs.updateActiveDescription') }}">
+    @csrf
 
     <textarea 
         name="description" 
         rows="2" 
         class="w-full bg-white/10 text-white placeholder-blue-300 border border-white/20 rounded-xl px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-white/40 resize-none" 
         placeholder="What are you working on?"
-    ></textarea>
+    >{{ $activeLog->description }}</textarea>
 
     <div class="flex justify-end mt-2">
         <button 

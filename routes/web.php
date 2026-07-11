@@ -23,8 +23,7 @@ Route::get('/',       [AuthController::class, 'showLogin'])->name('login');
 Route::get('/login',  [AuthController::class, 'showLogin']);
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
-Route::post('/logs/update-active-description', [TimeLogController::class, 'updateActiveDescription'])
-    ->name('logs.updateActiveDescription');
+
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {
@@ -35,6 +34,7 @@ Route::middleware('auth')->group(function () {
     // Time Tracking (Employee)
     Route::post('/clock-in',  [TimeLogController::class, 'clockIn'])->name('clock.in');
     Route::post('/clock-out', [TimeLogController::class, 'clockOut'])->name('clock.out');
+    Route::post('/logs/update-active-description', [TimeLogController::class, 'updateActiveDescription'])->name('logs.updateActiveDescription');
     Route::get('/my-logs',    [TimeLogController::class, 'myLogs'])->name('logs.my');
     Route::get('/my-logs/export', [TimeLogController::class, 'export'])->name('logs.export.my');
     Route::get('/my-logs/preview', [TimeLogController::class, 'preview'])->name('logs.preview');
