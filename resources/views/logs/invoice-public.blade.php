@@ -6,8 +6,8 @@
     <title>Invoice – {{ $user->name }} – {{ $label }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', system-ui, sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
         @media print {
             .no-print { display: none !important; }
             body { background: white; }
