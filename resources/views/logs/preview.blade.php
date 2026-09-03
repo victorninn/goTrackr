@@ -40,6 +40,31 @@
         class="border border-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer" />
     @endif
 
+    {{-- Custom tab with start/end date pickers --}}
+    <div class="relative">
+        <a href="{{ route('logs.preview', ['type' => 'custom', 'start_date' => request('start_date'), 'end_date' => request('end_date')]) }}"
+            class="px-5 py-2 rounded-full text-sm font-medium transition-colors
+            {{ $type === 'custom' ? 'bg-blue-600 text-white shadow' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
+            🗓️ Custom
+        </a>
+    </div>
+
+    @if($type === 'custom')
+    <div class="flex items-center gap-2">
+        <input type="date" id="custom-start" name="start_date"
+            value="{{ request('start_date', $start->toDateString()) }}"
+            class="border border-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer" />
+        <span class="text-gray-400 text-sm">to</span>
+        <input type="date" id="custom-end" name="end_date"
+            value="{{ request('end_date', $end->toDateString()) }}"
+            class="border border-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer" />
+        <button type="button" onclick="applyCustomRange()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-full text-sm font-medium transition-colors">
+            Generate
+        </button>
+    </div>
+    @endif
+
     <div class="ml-auto flex items-center gap-2">
         {{-- Copy Link --}}
         <button id="btn-share" onclick="generateShareLink('{{ $type }}')"
@@ -52,7 +77,7 @@
         </button>
 
         {{-- Export PDF --}}
-        <a href="{{ route('logs.export.my', ['type' => $type, 'week' => request('week'), 'month' => request('month')]) }}"
+        <a href="{{ route('logs.export.my', ['type' => $type, 'week' => request('week'), 'month' => request('month'), 'start_date' => request('start_date'), 'end_date' => request('end_date')]) }}"
             class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -177,6 +202,16 @@
 </div>
 
 <script>
+function applyCustomRange() {
+    const start = document.getElementById('custom-start').value;
+    const end   = document.getElementById('custom-end').value;
+    if (!start || !end) {
+        alert('Please choose both a start and end date.');
+        return;
+    }
+    window.location.href = '{{ route('logs.preview', ['type' => 'custom']) }}&start_date=' + start + '&end_date=' + end;
+}
+
 function generateShareLink(type) {
     const btn    = document.getElementById('btn-share');
     const text   = document.getElementById('share-btn-text');
@@ -192,9 +227,11 @@ function generateShareLink(type) {
             'X-CSRF-TOKEN': '{{ csrf_token() }}'
         },
         body: JSON.stringify({
-            type:  type,
-            week:  params.get('week'),
-            month: params.get('month')
+            type:       type,
+            week:       params.get('week'),
+            month:      params.get('month'),
+            start_date: params.get('start_date'),
+            end_date:   params.get('end_date')
         })
     })
     .then(r => r.json())

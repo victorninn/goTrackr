@@ -95,6 +95,17 @@ public function shareInvoice(Request $request)
         }
         $end   = $start->copy()->endOfWeek();
         $label = 'Week of ' . $start->format('M d') . ' – ' . $end->format('M d, Y');
+    } elseif ($type === 'custom') {
+        $start = $request->filled('start_date')
+            ? Carbon::parse($request->start_date)->startOfDay()
+            : now()->startOfWeek();
+        $end = $request->filled('end_date')
+            ? Carbon::parse($request->end_date)->endOfDay()
+            : $start->copy()->endOfDay();
+        if ($end->lt($start)) {
+            [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+        }
+        $label = $start->format('M d') . ' – ' . $end->format('M d, Y');
     } else {
         $monthStr = $request->get('month', now()->format('Y-m'));
         $start    = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth()->startOfDay();
@@ -164,6 +175,18 @@ public function export(Request $request)
         $end      = $start->copy()->endOfWeek();
         $label    = 'Week of ' . $start->format('M d') . ' – ' . $end->format('M d, Y');
         $filename = 'invoice_weekly_' . $start->format('Ymd') . '.pdf';
+    } elseif ($type === 'custom') {
+        $start = $request->filled('start_date')
+            ? Carbon::parse($request->start_date)->startOfDay()
+            : now()->startOfWeek();
+        $end = $request->filled('end_date')
+            ? Carbon::parse($request->end_date)->endOfDay()
+            : $start->copy()->endOfDay();
+        if ($end->lt($start)) {
+            [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+        }
+        $label    = $start->format('M d') . ' – ' . $end->format('M d, Y');
+        $filename = 'invoice_custom_' . $start->format('Ymd') . '_' . $end->format('Ymd') . '.pdf';
     } else {
         $monthStr = $request->get('month', now()->format('Y-m'));
         $start    = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth()->startOfDay();
@@ -224,6 +247,17 @@ private function buildLogQuery(User $user, string $type, ?string $week = null, ?
             }
             $end   = $start->copy()->endOfWeek();
             $label = $start->format('M d') . ' – ' . $end->format('M d, Y');
+        } elseif ($type === 'custom') {
+            $start = $request->filled('start_date')
+                ? Carbon::parse($request->start_date)->startOfDay()
+                : now()->startOfWeek();
+            $end = $request->filled('end_date')
+                ? Carbon::parse($request->end_date)->endOfDay()
+                : $start->copy()->endOfDay();
+            if ($end->lt($start)) {
+                [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+            }
+            $label = $start->format('M d') . ' – ' . $end->format('M d, Y');
         } else {
             $monthStr = $request->get('month', now()->format('Y-m'));
             $start    = Carbon::createFromFormat('Y-m', $monthStr)->startOfMonth();
@@ -239,7 +273,7 @@ private function buildLogQuery(User $user, string $type, ?string $week = null, ?
         $totalHours = $logs->sum('total_hours');
         $totalPay   = $totalHours * $user->hourly_rate;
 
-        return view('logs.preview', compact('type', 'label', 'logs', 'totalHours', 'totalPay', 'user'));
+        return view('logs.preview', compact('type', 'label', 'logs', 'totalHours', 'totalPay', 'user', 'start', 'end'));
     }
 
     public function create()
